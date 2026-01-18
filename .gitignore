@@ -1,0 +1,5 @@
+.vscode/
+dependencies/
+*.dSYM/
+glad.cpp
+.DS_Store
