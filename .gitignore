@@ -3,3 +3,4 @@ dependencies/
 *.dSYM/
 glad.cpp
 .DS_Store
+*.o
