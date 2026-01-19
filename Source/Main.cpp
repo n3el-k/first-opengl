@@ -41,7 +41,7 @@ int main()
     glViewport(0, 0, framebufferWidth, framebufferHeight);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     
-    Shader shader("Shaders/TriangleVertexShader.vs", "Shaders/TriangleFragmentShader.fs");
+    Shader shader("Source/Shaders/TriangleVertexShader.vs", "Source/Shaders/TriangleFragmentShader.fs");
     
     // vertex data
     // float vertices[] = {
