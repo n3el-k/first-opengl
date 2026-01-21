@@ -12,6 +12,11 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
     linkProgram();
 }
 
+Shader::~Shader()
+{
+    glDeleteProgram(ID);
+}
+
 void Shader::use()
 {
     glUseProgram(ID);
@@ -96,6 +101,9 @@ void Shader::compileFragmentShader(const char* fragmentPath)
 
 void Shader::linkProgram()
 {
+    assert(vertexShader != 0);
+    assert(fragmentShader != 0);
+
     ID = glCreateProgram();
     glAttachShader(ID, vertexShader);
     glAttachShader(ID, fragmentShader);
