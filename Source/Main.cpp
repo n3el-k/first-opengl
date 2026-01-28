@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb/stb_image.h>
 #include "Shader.h"
+#include "Texture.h"
 #include <iostream>
 #include <cassert>
 
@@ -45,27 +45,21 @@ int main()
     Shader shader("Assets/Shaders/TriangleVertexShader.vs", "Assets/Shaders/TriangleFragmentShader.fs");
 
     float vertices[] = {
-        // pos               // color            // tex
+        // pos               // color (RGB)      // tex
         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
         -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f,   // top left 
         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
         -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        0.0f, 0.5f, 0.0f,    0.0f, 0.0f, 0.0f,   0.5f, 0.5f
     };
 
     uint32_t indices[] = {
         0, 1, 2,
-        1, 2, 3
+        1, 2, 3,
     };
 
-    int width, height, numChannels;
-    unsigned char* data = stbi_load("Assets/Textures/container.jpg", &width, &height, &numChannels, 0);
-    assert(data && "Faled to load texture");
-    uint32_t texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data);
+    Texture texture1("Assets/Textures/container.jpg", GL_RGB);
+    Texture texture2("Assets/Textures/smiley.png", GL_RGBA);
 
     unsigned int VAO;
     unsigned int VBO;
@@ -96,6 +90,10 @@ int main()
     glEnableVertexAttribArray(2);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    shader.use();
+    glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0); 
+    shader.setInt("texture2", 1);
+
     // Main loop
     while(!glfwWindowShouldClose(window))
     {
@@ -103,11 +101,12 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        texture1.bind(0);
+        texture2.bind(1);
+
         shader.use();
-        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
