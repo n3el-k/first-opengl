@@ -4,5 +4,4 @@ dependencies/
 glad.cpp
 .DS_Store
 *.o
-Makefile
 build/
