@@ -101,18 +101,30 @@ int main()
 
         texture1.bind(0);
         texture2.bind(1);
+        shader.use();
+        glBindVertexArray(VAO);
 
-        // create glm transformations
+        // First container
         glm::mat4 transformations = glm::mat4(1.0f);
         transformations = glm::translate(transformations, glm::vec3(0.5f, -0.5f, 0.0f));
         transformations = glm::rotate(transformations, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-
-        uint32_t transformLoc = glGetUniformLocation(shader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformations));
-
-        shader.use();
-        glBindVertexArray(VAO);
+        uint32_t transformLoc1 = glGetUniformLocation(shader.ID, "transform");
+        glUniformMatrix4fv(transformLoc1, 1, GL_FALSE, glm::value_ptr(transformations));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Second container
+        transformations = glm::mat4(1.0f);
+        transformations = glm::translate(transformations, glm::vec3(-0.5f, 0.5f, 0.0f));
+
+        // Set scale so there is no negative value, and clamp it to prevent disappearing (range [0.5, 1.5]);
+        float scale = (float)sin(glfwGetTime()) * 0.5f + 1.0f;
+        transformations = glm::scale(transformations, glm::vec3(scale, scale, 0.0f));
+        transformations = glm::rotate(transformations, -(float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        uint32_t transformLoc2 = glGetUniformLocation(shader.ID, "transform");
+        glUniformMatrix4fv(transformLoc2, 1, GL_FALSE, glm::value_ptr(transformations));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
