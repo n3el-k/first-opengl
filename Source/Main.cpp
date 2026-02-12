@@ -88,6 +88,16 @@ int main()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+
+    /*CAMERA MATRICES*/
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH/WINDOW_HEIGHT, 0.1f, 100.0f);
+
     shader.use();
     glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0); 
     shader.setInt("texture2", 1);
@@ -96,7 +106,7 @@ int main()
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
-        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         texture1.bind(0);
@@ -104,25 +114,13 @@ int main()
         shader.use();
         glBindVertexArray(VAO);
 
-        // First container
-        glm::mat4 transformations = glm::mat4(1.0f);
-        transformations = glm::translate(transformations, glm::vec3(0.5f, -0.5f, 0.0f));
-        transformations = glm::rotate(transformations, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        uint32_t transformLoc1 = glGetUniformLocation(shader.ID, "transform");
-        glUniformMatrix4fv(transformLoc1, 1, GL_FALSE, glm::value_ptr(transformations));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        uint32_t modelLoc = glGetUniformLocation(shader.ID, "model");
+        uint32_t viewLoc = glGetUniformLocation(shader.ID, "view");
+        uint32_t projectionLoc = glGetUniformLocation(shader.ID, "projection");
 
-        // Second container
-        transformations = glm::mat4(1.0f);
-        transformations = glm::translate(transformations, glm::vec3(-0.5f, 0.5f, 0.0f));
-
-        // Set scale so there is no negative value, and clamp it to prevent disappearing (range [0.5, 1.5]);
-        float scale = (float)sin(glfwGetTime()) * 0.5f + 1.0f;
-        transformations = glm::scale(transformations, glm::vec3(scale, scale, 0.0f));
-        transformations = glm::rotate(transformations, -(float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-
-        uint32_t transformLoc2 = glGetUniformLocation(shader.ID, "transform");
-        glUniformMatrix4fv(transformLoc2, 1, GL_FALSE, glm::value_ptr(transformations));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
         glfwSwapBuffers(window);
