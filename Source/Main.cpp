@@ -92,14 +92,6 @@ int main()
     glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0); 
     shader.setInt("texture2", 1);
 
-    // apply transformation
-    glm::mat4 transformations = glm::mat4(1.0f);
-    transformations = glm::scale(transformations, glm::vec3(0.5, 0.5, 0.5));
-    transformations = glm::rotate(transformations, glm::radians(90.0f), glm::vec3(0, 0, 1));
-
-    uint32_t transformLoc = glGetUniformLocation(shader.ID, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm ::value_ptr(transformations));
-
     // Main loop
     while(!glfwWindowShouldClose(window))
     {
@@ -109,6 +101,14 @@ int main()
 
         texture1.bind(0);
         texture2.bind(1);
+
+        // create glm transformations
+        glm::mat4 transformations = glm::mat4(1.0f);
+        transformations = glm::translate(transformations, glm::vec3(0.5f, -0.5f, 0.0f));
+        transformations = glm::rotate(transformations, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        uint32_t transformLoc = glGetUniformLocation(shader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformations));
 
         shader.use();
         glBindVertexArray(VAO);
