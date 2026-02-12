@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-typedef unsigned int GLenum; 
+typedef unsigned int GLenum;
 
 class Texture
 {
@@ -12,7 +12,4 @@ public:
     ~Texture();
 
     void bind(uint32_t unit = 0) const;
-
-private:
-
 };
