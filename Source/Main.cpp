@@ -11,7 +11,12 @@
 
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
-const float CAMERA_SPEED = 0.05f;
+const float CAMERA_SPEED = 17.f;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+int frameCount = 0;
+float fpsTimer = 0.0f;
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -21,33 +26,32 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window, glm::vec3& cameraPos, glm::vec3& cameraFront, glm::vec3& cameraUp)
 {
-
     /*CAMERA INPUTS*/
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos += cameraFront * CAMERA_SPEED; 
+        cameraPos += cameraFront * CAMERA_SPEED * deltaTime; 
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos -= cameraFront * CAMERA_SPEED; 
+        cameraPos -= cameraFront * CAMERA_SPEED * deltaTime; 
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= CAMERA_SPEED * glm::normalize(glm::cross(cameraFront, cameraUp)); 
+        cameraPos -= CAMERA_SPEED * deltaTime * glm::normalize(glm::cross(cameraFront, cameraUp)); 
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += CAMERA_SPEED * glm::normalize(glm::cross(cameraFront, cameraUp)); 
+        cameraPos += CAMERA_SPEED * deltaTime * glm::normalize(glm::cross(cameraFront, cameraUp)); 
     }
 
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        cameraPos += CAMERA_SPEED * cameraUp;
+        cameraPos += CAMERA_SPEED * deltaTime * cameraUp;
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        cameraPos -= CAMERA_SPEED * cameraUp;
+        cameraPos -= CAMERA_SPEED * deltaTime * cameraUp;
     }
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -204,6 +208,19 @@ int main()
     // Main loop
     while(!glfwWindowShouldClose(window))
     {
+        /*DELTA TIME CALCULATIONS*/
+        deltaTime = glfwGetTime() - lastFrame;
+        lastFrame = glfwGetTime();
+        frameCount++;
+        fpsTimer += deltaTime;
+        
+        if (fpsTimer >= 1.0f)
+        {
+            float fps = frameCount / fpsTimer;
+            std::string title = "First OpenGL - " + std::to_string((int)fps);
+            glfwSetWindowTitle(window, title.c_str());
+        }
+
         processInput(window, cameraPos, cameraFront, cameraUp);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
