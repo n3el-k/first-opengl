@@ -18,10 +18,55 @@ float lastFrame = 0.0f;
 int frameCount = 0;
 float fpsTimer = 0.0f;
 
+/*CAMERA VECTORS*/    
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+/*Mouse*/
+bool firstMouseInput = true;
+float yaw = -90.f;
+float pitch;
+float lastX = WINDOW_WIDTH/2;
+float lastY = WINDOW_HEIGHT/2;
+float sens = 0.1f;
+
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     (void)window; // to supress warning
     glViewport(0, 0, width, height);
+}
+
+void mouseCallback(GLFWwindow* window, double xPos, double yPos)
+{
+    (void)window;
+
+    if (firstMouseInput)
+    {
+        lastX = xPos;
+        lastY = yPos;
+        firstMouseInput = false;
+    }
+
+    float xOff = xPos - lastX;
+    float yOff = -(yPos - lastY);
+    lastX = xPos;
+    lastY = yPos;
+    xOff *= sens;
+    yOff *= sens;
+
+    yaw += xOff;
+    pitch += yOff;
+
+    /*Constain pitch*/
+    pitch = glm::clamp(pitch, -89.9f, 89.9f);
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    cameraFront = glm::normalize(direction);
 }
 
 void processInput(GLFWwindow* window, glm::vec3& cameraPos, glm::vec3& cameraFront, glm::vec3& cameraUp)
@@ -73,6 +118,8 @@ int main()
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "First OpenGL", NULL, NULL);
     assert(window != NULL);
     glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+    glfwSetCursorPosCallback(window, mouseCallback); 
 
     assert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress));
     int framebufferWidth, framebufferHeight;
@@ -149,7 +196,7 @@ int main()
         20, 22, 23,
     };
 
-    Texture texture1("Assets/Textures/container.jpg", GL_RGB);
+    Texture texture1("Assets/Textures/brick.jpg", GL_RGB);
     Texture texture2("Assets/Textures/smiley.png", GL_RGBA, true);
 
     unsigned int VAO;
@@ -175,11 +222,6 @@ int main()
     //texture attribute from vertrices
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    /*CAMERA VECTORS*/
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
     /*COORDINATE MATRICES*/
     glm::mat4 model = glm::mat4(1.0f);
@@ -219,6 +261,8 @@ int main()
             float fps = frameCount / fpsTimer;
             std::string title = "First OpenGL - " + std::to_string((int)fps);
             glfwSetWindowTitle(window, title.c_str());
+            frameCount = 0;
+            fpsTimer = 0;
         }
 
         processInput(window, cameraPos, cameraFront, cameraUp);
