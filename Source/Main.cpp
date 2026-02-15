@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include "Shader.h"
 #include "Texture.h"
+#include "Camera.h"
 #include <iostream>
 #include <cassert>
 
@@ -11,25 +12,19 @@
 
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
-const float CAMERA_SPEED = 17.f;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 int frameCount = 0;
 float fpsTimer = 0.0f;
 
-/*CAMERA VECTORS*/    
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+//Camera
+Camera camera(glm::vec3(0.f, 0.f, 3.0f));
 
 /*Mouse*/
 bool firstMouseInput = true;
-float yaw = -90.f;
-float pitch;
 float lastX = WINDOW_WIDTH/2;
 float lastY = WINDOW_HEIGHT/2;
-float sens = 0.1f;
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -40,7 +35,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
     (void)window;
-
+    
     if (firstMouseInput)
     {
         lastX = xPos;
@@ -52,53 +47,36 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
     float yOff = -(yPos - lastY);
     lastX = xPos;
     lastY = yPos;
-    xOff *= sens;
-    yOff *= sens;
-
-    yaw += xOff;
-    pitch += yOff;
-
-    /*Constain pitch*/
-    pitch = glm::clamp(pitch, -89.9f, 89.9f);
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
-    cameraFront = glm::normalize(direction);
+    camera.processMouse(xOff, yOff);
 }
 
-void processInput(GLFWwindow* window, glm::vec3& cameraPos, glm::vec3& cameraFront, glm::vec3& cameraUp)
+void processInput(GLFWwindow* window)
 {
     /*CAMERA INPUTS*/
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos += cameraFront * CAMERA_SPEED * deltaTime; 
+        camera.processKeyboard(FORWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos -= cameraFront * CAMERA_SPEED * deltaTime; 
+        camera.processKeyboard(BACKWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= CAMERA_SPEED * deltaTime * glm::normalize(glm::cross(cameraFront, cameraUp)); 
+        camera.processKeyboard(LEFT, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += CAMERA_SPEED * deltaTime * glm::normalize(glm::cross(cameraFront, cameraUp)); 
+        camera.processKeyboard(RIGHT, deltaTime);
     }
-
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        cameraPos += CAMERA_SPEED * deltaTime * cameraUp;
+        camera.processKeyboard(UP, deltaTime);
     }
-
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        cameraPos -= CAMERA_SPEED * deltaTime * cameraUp;
+        camera.processKeyboard(DOWN, deltaTime);
     }
-
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
@@ -265,7 +243,7 @@ int main()
             fpsTimer = 0;
         }
 
-        processInput(window, cameraPos, cameraFront, cameraUp);
+        processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -277,7 +255,7 @@ int main()
         uint32_t viewLoc = glGetUniformLocation(shader.ID, "view");
         uint32_t projectionLoc = glGetUniformLocation(shader.ID, "projection");
 
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = camera.getViewMatrix();
 
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
