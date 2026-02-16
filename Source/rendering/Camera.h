@@ -23,7 +23,7 @@ public:
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float startingYaw = -90.f, 
         float startingPitch = 0.f, float speed = 17.f, float mouseSens=0.08f);
 
-    glm::mat4 getViewMatrix();
+    glm::mat4 getViewMatrix() const;
     void processKeyboard(MOVEMENT_DIRECTIONS direction, float deltaTime);
     void processMouse(float xOff, float yOff, GLboolean isPitchConstrained = true);    
 

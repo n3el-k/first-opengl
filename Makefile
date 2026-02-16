@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = clang++
-CXXFLAGS = -std=c++17 -Wall -Wextra
+CXXFLAGS = -std=c++17 -Wall -Wextra -g
 LDFLAGS = -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 LIBS = -lglfw.3.4
 
@@ -8,13 +8,13 @@ LIBS = -lglfw.3.4
 SRC_DIR = Source
 BUILD_DIR = Build
 DEPS_DIR = Dependencies
-INCLUDE_DIRS = -I$(DEPS_DIR)/include
+INCLUDE_DIRS = -I$(DEPS_DIR)/include -I$(SRC_DIR)
 LIB_DIRS = -L$(DEPS_DIR)/lib
 
 # Files
 TARGET = $(BUILD_DIR)/Program
-SOURCES = $(SRC_DIR)/Main.cpp $(SRC_DIR)/Shader.cpp $(SRC_DIR)/Texture.cpp $(SRC_DIR)/Camera.cpp
-OBJECTS = $(BUILD_DIR)/Main.o $(BUILD_DIR)/Shader.o $(BUILD_DIR)/Texture.o $(BUILD_DIR)/Camera.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/stb_image.o 
+# SOURCES = $(SRC_DIR)/Main.cpp $(SRC_DIR)/rendering/Shader.cpp $(SRC_DIR)/rendering/Texture.cpp $(SRC_DIR)/rendering/Camera.cpp
+OBJECTS = $(BUILD_DIR)/Main.o $(BUILD_DIR)/Shader.o $(BUILD_DIR)/Texture.o $(BUILD_DIR)/Camera.o $(BUILD_DIR)/App.o $(BUILD_DIR)/Renderer.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/stb_image.o 
 
 # Default target
 all: $(TARGET)
@@ -27,13 +27,19 @@ $(BUILD_DIR):
 $(BUILD_DIR)/Main.o: $(SRC_DIR)/Main.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
-$(BUILD_DIR)/Shader.o: $(SRC_DIR)/Shader.cpp | $(BUILD_DIR)
+$(BUILD_DIR)/Shader.o: $(SRC_DIR)/rendering/Shader.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
-$(BUILD_DIR)/Texture.o: $(SRC_DIR)/Texture.cpp | $(BUILD_DIR)
+$(BUILD_DIR)/Texture.o: $(SRC_DIR)/rendering/Texture.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
-$(BUILD_DIR)/Camera.o: $(SRC_DIR)/Camera.cpp | $(BUILD_DIR)
+$(BUILD_DIR)/Camera.o: $(SRC_DIR)/rendering/Camera.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+$(BUILD_DIR)/Renderer.o: $(SRC_DIR)/rendering/Renderer.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+$(BUILD_DIR)/App.o: $(SRC_DIR)/core/App.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
 # THIRD PARTY CPP FILES
